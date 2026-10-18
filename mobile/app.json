@@ -18,14 +18,27 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.santhosh0619.campaignamplification"
+      "package": "com.santhosh0619.campaignamplification",
+      "permissions": []
     },
     "plugins": [
       "expo-router",
       "expo-font",
       "expo-image",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Campaign uses your photos so you can add pictures to your campaign."
+        }
+      ]
     ],
-    "scheme": "campaign"
+    "scheme": "campaign",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ECEAE4"
+    },
+    "extra": {}
   }
 }
