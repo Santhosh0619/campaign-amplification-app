@@ -1,0 +1,17 @@
+node_modules/
+.expo/
+dist/
+build/
+web-build/
+*.apk
+*.aab
+*.ipa
+*.log
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+coverage/
