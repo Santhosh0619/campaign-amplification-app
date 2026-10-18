@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { parse, wrap } from '../../lib/errors.js';
 import { requireAuth } from '../../middleware/auth.js';
-import { draftFromPrompt } from '../../providers/ai.js';
+import { draftFromAnswers, draftFromPrompt } from '../../providers/ai.js';
 
 export const aiRouter = Router();
 aiRouter.use(requireAuth);
@@ -32,5 +32,21 @@ aiRouter.post(
   wrap(async (req, res) => {
     const { title } = parse(z.object({ title: z.string().max(60).default('') }), req.body ?? {});
     res.json({ demo: true, cover: { generated: true, alt: title ? `Generated cover for ${title}` : 'Generated cover' } });
+  }),
+);
+
+const voiceSchema = z.object({
+  about: z.string().trim().min(10, 'Tell us a little about the message.').max(1500),
+  audience: z.string().trim().max(800).default(''),
+  why: z.string().trim().max(1500).default(''),
+  evidence: z.string().trim().max(1500).default(''),
+});
+
+/** Demo mode: turns the guided interview answers into an editable draft. Nothing is published or submitted. */
+aiRouter.post(
+  '/voice-draft',
+  wrap(async (req, res) => {
+    const answers = parse(voiceSchema, req.body);
+    res.json({ demo: true, draft: draftFromAnswers(answers) });
   }),
 );

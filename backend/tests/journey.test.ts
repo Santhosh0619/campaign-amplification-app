@@ -270,3 +270,24 @@ describe('comments', () => {
     expect(ok.status).toBe(200);
   });
 });
+
+describe('voice interview draft', () => {
+  it('turns interview answers into an editable draft with sources from links', async () => {
+    const token = await signUp('voice@example.com');
+    const res = await request(app)
+      .post(api('/ai/voice-draft'))
+      .set({ Authorization: `Bearer ${token}` })
+      .send({
+        about: 'Bus stops in the hottest districts have no shade. The tree budget is decided next month.',
+        audience: 'Commuters in the north districts',
+        why: 'Waiting in the sun is a daily health risk.',
+        evidence: 'The 2026 thermal survey https://example.org/thermal-2026 found an 11 degree gap.',
+      });
+    expect(res.status).toBe(200);
+    expect(res.body.draft.title.length).toBeLessThanOrEqual(60);
+    expect(res.body.draft.sources[0].url).toBe('https://example.org/thermal-2026');
+    expect(res.body.draft.targetAudience).toContain('north districts');
+    const short = await request(app).post(api('/ai/voice-draft')).set({ Authorization: `Bearer ${token}` }).send({ about: 'Hi' });
+    expect(short.status).toBe(400);
+  });
+});
