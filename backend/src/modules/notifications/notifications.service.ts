@@ -1,6 +1,6 @@
 import { db } from '../../db/index.js';
 import { newId, nowIso } from '../../lib/ids.js';
-import type { Notification, NotificationCategory, User } from '../../types/domain.js';
+import type { Campaign, Contribution, Notification, NotificationCategory, User } from '../../types/domain.js';
 
 type NotifyInput = {
   userId: string;
@@ -45,4 +45,29 @@ export async function markRead(userId: string, ids?: string[]): Promise<number> 
     changed += 1;
   }
   return changed;
+}
+
+const DAY = 86_400_000;
+
+/**
+ * Creates "deadline approaching" notices (once per campaign) for creators and backers
+ * of open campaigns that end within three days. Computed when notifications are opened.
+ */
+export async function syncDeadlineNotices(userId: string) {
+  const campaigns = await db.list<Campaign>('campaigns');
+  const backedIds = new Set((await db.list<Contribution>('contributions')).filter((c) => c.userId === userId && c.status === 'succeeded').map((c) => c.campaignId));
+  for (const c of campaigns) {
+    if (c.status !== 'available_for_funding' || !c.fundingEndsAt) continue;
+    if (c.creatorId !== userId && !backedIds.has(c.id)) continue;
+    const left = Math.ceil((new Date(c.fundingEndsAt).getTime() - Date.now()) / DAY);
+    if (left > 3 || left < 0) continue;
+    await notify({
+      userId,
+      category: 'funding',
+      type: 'deadline_approaching',
+      title: left <= 1 ? 'Funding ends soon' : `${left} days left`,
+      body: `The funding window for "${c.title}" closes ${left <= 1 ? 'within a day' : `in ${left} days`}.`,
+      campaignId: c.id,
+    });
+  }
 }

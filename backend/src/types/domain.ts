@@ -181,6 +181,8 @@ export type Comment = {
   userId: string;
   authorName: string;
   body: string;
+  parentId?: string | null;
+  reportedBy?: string[];
   createdAt: string;
 };
 

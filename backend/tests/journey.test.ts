@@ -241,3 +241,32 @@ describe('reach targeting', () => {
     expect(ok.status).toBe(200);
   });
 });
+
+describe('comments', () => {
+  it('supports replies, reporting and hiding after repeated reports', async () => {
+    const a = await signUp('ca@example.com');
+    const authA = { Authorization: `Bearer ${a}` };
+    const root = await request(app).post(api('/campaigns/shade-trees/comments')).set(authA).send({ body: 'First comment on this page.' });
+    expect(root.status).toBe(201);
+    const reply = await request(app).post(api('/campaigns/shade-trees/comments')).set(authA).send({ body: 'A reply to myself.', parentId: root.body.comment.id });
+    expect(reply.status).toBe(201);
+    const bad = await request(app).post(api('/campaigns/shade-trees/comments')).set(authA).send({ body: 'Orphan reply here.', parentId: 'com_missing' });
+    expect(bad.status).toBe(400);
+
+    for (const device of ['d1', 'd2', 'd3']) {
+      await request(app).post(api(`/campaigns/shade-trees/comments/${root.body.comment.id}/report`)).set('x-device-id', device).expect(200);
+    }
+    const list = await request(app).get(api('/campaigns/shade-trees/comments'));
+    expect(list.body.items.some((c: { id: string }) => c.id === root.body.comment.id)).toBe(false);
+  });
+
+  it('only lets the author delete a comment', async () => {
+    const a = await signUp('cb@example.com');
+    const b = await signUp('cc@example.com');
+    const c = await request(app).post(api('/campaigns/shade-trees/comments')).set({ Authorization: `Bearer ${a}` }).send({ body: 'Mine to delete later.' });
+    const denied = await request(app).delete(api(`/campaigns/shade-trees/comments/${c.body.comment.id}`)).set({ Authorization: `Bearer ${b}` });
+    expect(denied.status).toBe(400);
+    const ok = await request(app).delete(api(`/campaigns/shade-trees/comments/${c.body.comment.id}`)).set({ Authorization: `Bearer ${a}` });
+    expect(ok.status).toBe(200);
+  });
+});
