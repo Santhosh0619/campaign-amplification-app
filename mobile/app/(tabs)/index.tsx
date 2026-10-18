@@ -1,9 +1,5 @@
-import { EmptyState, Screen } from '@/components/ui';
+import { HomeScreen } from '@/features/campaigns/HomeScreen';
 
-export default function IndexScreen() {
-  return (
-    <Screen>
-      <EmptyState title="Index" message="This screen is built in an upcoming feature." />
-    </Screen>
-  );
+export default function Home() {
+  return <HomeScreen />;
 }

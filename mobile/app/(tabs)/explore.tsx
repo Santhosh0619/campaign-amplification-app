@@ -1,9 +1,5 @@
-import { EmptyState, Screen } from '@/components/ui';
+import { ExploreScreen } from '@/features/campaigns/ExploreScreen';
 
-export default function ExploreScreen() {
-  return (
-    <Screen>
-      <EmptyState title="Explore" message="This screen is built in an upcoming feature." />
-    </Screen>
-  );
+export default function Explore() {
+  return <ExploreScreen />;
 }
