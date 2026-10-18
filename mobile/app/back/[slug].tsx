@@ -1,10 +1,5 @@
-import { EmptyState, Screen, ScreenHeader } from '@/components/ui';
+import { BackFlowScreen } from '@/features/back/BackFlowScreen';
 
-export default function BackScreen() {
-  return (
-    <Screen>
-      <ScreenHeader title="Back this campaign" />
-      <EmptyState title="Back this campaign" message="Built in the back flow feature." />
-    </Screen>
-  );
+export default function BackRoute() {
+  return <BackFlowScreen />;
 }
