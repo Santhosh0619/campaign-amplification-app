@@ -1,9 +1,9 @@
-import { Text, View } from 'react-native';
+import { EmptyState, Screen } from '@/components/ui';
 
-export default function Home() {
+export default function IndexScreen() {
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Campaign Amplification</Text>
-    </View>
+    <Screen>
+      <EmptyState title="Index" message="This screen is built in an upcoming feature." />
+    </Screen>
   );
 }
