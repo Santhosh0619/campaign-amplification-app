@@ -1,9 +1,5 @@
-import { EmptyState, Screen } from '@/components/ui';
+import { CreateEntryScreen } from '@/features/create/CreateEntryScreen';
 
-export default function CreateScreen() {
-  return (
-    <Screen>
-      <EmptyState title="Create" message="This screen is built in an upcoming feature." />
-    </Screen>
-  );
+export default function Create() {
+  return <CreateEntryScreen />;
 }

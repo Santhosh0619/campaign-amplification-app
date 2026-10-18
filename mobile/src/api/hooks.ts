@@ -1,7 +1,7 @@
 import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { api } from './client';
 import { FALLBACK_CONFIG } from '@/lib/reach';
-import type { AppConfig, CampaignCard, CampaignDetailResponse, NotificationItem, Paged, Report } from '@/types/api';
+import type { AppConfig, CampaignCard, CampaignDetailResponse, NotificationItem, OwnerCampaign, Paged, Report } from '@/types/api';
 
 export const qk = {
   config: ['config'] as const,
@@ -81,4 +81,8 @@ export type CommentItem = { id: string; authorName: string; body: string; create
 
 export function useComments(slug: string) {
   return useQuery({ queryKey: ['campaigns', 'comments', slug], queryFn: () => api<{ items: CommentItem[] }>(`/campaigns/${slug}/comments`), enabled: Boolean(slug) });
+}
+
+export function useMyCampaigns(enabled: boolean) {
+  return useQuery({ queryKey: qk.mine, queryFn: () => api<{ items: OwnerCampaign[] }>('/campaigns/mine'), enabled });
 }
