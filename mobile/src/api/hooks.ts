@@ -1,7 +1,7 @@
 import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { api } from './client';
 import { FALLBACK_CONFIG } from '@/lib/reach';
-import type { AppConfig, CampaignCard, CampaignDetailResponse, NotificationItem, Paged } from '@/types/api';
+import type { AppConfig, CampaignCard, CampaignDetailResponse, NotificationItem, Paged, Report } from '@/types/api';
 
 export const qk = {
   config: ['config'] as const,
@@ -63,4 +63,22 @@ export function useNotifications(enabled: boolean) {
     enabled,
     refetchInterval: 30_000,
   });
+}
+
+export function useReports(slug: string) {
+  return useQuery({ queryKey: ['campaigns', 'reports', slug], queryFn: () => api<{ items: Report[] }>(`/campaigns/${slug}/reports`), enabled: Boolean(slug) });
+}
+
+export function useBackers(slug: string) {
+  return useQuery({
+    queryKey: ['campaigns', 'backers', slug],
+    queryFn: () => api<{ named: string[]; privateCount: number; total: number }>(`/contributions/campaign/${slug}/backers`),
+    enabled: Boolean(slug),
+  });
+}
+
+export type CommentItem = { id: string; authorName: string; body: string; createdAt: string };
+
+export function useComments(slug: string) {
+  return useQuery({ queryKey: ['campaigns', 'comments', slug], queryFn: () => api<{ items: CommentItem[] }>(`/campaigns/${slug}/comments`), enabled: Boolean(slug) });
 }

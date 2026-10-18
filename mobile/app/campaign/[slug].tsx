@@ -1,10 +1,5 @@
-import { EmptyState, Screen, ScreenHeader } from '@/components/ui';
+import { CampaignDetailScreen } from '@/features/campaigns/CampaignDetailScreen';
 
-export default function CampaignScreen() {
-  return (
-    <Screen>
-      <ScreenHeader title="Campaign" />
-      <EmptyState title="Campaign" message="Built in the campaign detail feature." />
-    </Screen>
-  );
+export default function CampaignRoute() {
+  return <CampaignDetailScreen />;
 }

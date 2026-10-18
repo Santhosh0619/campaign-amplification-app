@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { ErrorState, Screen } from '@/components/ui';
+import { ErrorState, Screen, ToastHost } from '@/components/ui';
 import { useAuth } from '@/store/auth';
 import { fontSources, ThemeProvider, useTheme } from '@/theme';
 
@@ -34,6 +34,7 @@ function Shell() {
         <Stack.Screen name="(tabs)" options={{ animation: 'none' }} />
         <Stack.Screen name="auth/index" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
       </Stack>
+      <ToastHost />
     </View>
   );
 }
