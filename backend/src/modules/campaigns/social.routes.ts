@@ -4,7 +4,8 @@ import { db } from '../../db/index.js';
 import { badRequest, parse, wrap } from '../../lib/errors.js';
 import { newId, nowIso } from '../../lib/ids.js';
 import { optionalAuth, requireAuth } from '../../middleware/auth.js';
-import type { Comment, Feedback, Reaction, Report, Saved } from '../../types/domain.js';
+import type { Campaign, Comment, Feedback, Reaction, Report, Saved } from '../../types/domain.js';
+import { notify } from '../notifications/notifications.service.js';
 import { findCampaign, isPublic } from './campaign.service.js';
 
 export const socialRouter = Router({ mergeParams: true });
@@ -71,32 +72,49 @@ socialRouter.post(
 
 socialRouter.get(
   '/comments',
+  optionalAuth,
   wrap(async (req, res) => {
     const c = await publicCampaign(req);
+    const key = viewerKey(req);
+    const me = req.user?.id;
     const items = (await db.list<Comment>('comments'))
-      .filter((x) => x.campaignId === c.id)
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+      .filter((x) => x.campaignId === c.id && (x.reportedBy?.length ?? 0) < 3)
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+      .map(({ reportedBy, ...x }) => ({ ...x, parentId: x.parentId ?? null, mine: x.userId === me, reportedByMe: (reportedBy ?? []).includes(key) }));
     res.json({ items });
   }),
 );
 
-const commentSchema = z.object({ body: z.string().trim().min(2, 'Write a little more.').max(600, 'Keep comments under 600 characters.') });
+const commentSchema = z.object({
+  body: z.string().trim().min(2, 'Write a little more.').max(600, 'Keep comments under 600 characters.'),
+  parentId: z.string().optional(),
+});
 
 socialRouter.post(
   '/comments',
   requireAuth,
   wrap(async (req, res) => {
     const c = await publicCampaign(req);
-    const { body } = parse(commentSchema, req.body);
+    const { body, parentId } = parse(commentSchema, req.body);
+    if (parentId) {
+      const parent = await db.get<Comment>('comments', parentId);
+      if (!parent || parent.campaignId !== c.id) throw badRequest('The comment you are replying to no longer exists.');
+    }
     const comment: Comment = {
       id: newId('com'),
       campaignId: c.id,
       userId: req.user!.id,
       authorName: req.user!.name,
       body,
+      parentId: parentId ?? null,
+      reportedBy: [],
       createdAt: nowIso(),
     };
     await db.put('comments', comment);
+    const full = await db.get<Campaign>('campaigns', c.id);
+    if (full && full.creatorId !== req.user!.id) {
+      await notify({ userId: full.creatorId, category: 'reports', type: 'new_comments', title: 'New comments on your campaign', body: `People are talking about "${full.title}".`, campaignId: full.id });
+    }
     res.status(201).json({ comment });
   }),
 );
@@ -112,5 +130,32 @@ socialRouter.get(
       .filter((r) => r.campaignId === c.id)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     res.json({ items });
+  }),
+);
+
+socialRouter.post(
+  '/comments/:commentId/report',
+  optionalAuth,
+  wrap(async (req, res) => {
+    const c = await publicCampaign(req);
+    const comment = await db.get<Comment>('comments', String(req.params.commentId));
+    if (!comment || comment.campaignId !== c.id) throw badRequest('That comment no longer exists.');
+    const key = viewerKey(req);
+    const reportedBy = [...new Set([...(comment.reportedBy ?? []), key])];
+    await db.put('comments', { ...comment, reportedBy });
+    res.json({ reported: true });
+  }),
+);
+
+socialRouter.delete(
+  '/comments/:commentId',
+  requireAuth,
+  wrap(async (req, res) => {
+    const c = await publicCampaign(req);
+    const comment = await db.get<Comment>('comments', String(req.params.commentId));
+    if (!comment || comment.campaignId !== c.id) throw badRequest('That comment no longer exists.');
+    if (comment.userId !== req.user!.id) throw badRequest('You can only delete your own comments.');
+    await db.remove('comments', comment.id);
+    res.json({ ok: true });
   }),
 );

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { db } from '../../db/index.js';
 import { parse, wrap } from '../../lib/errors.js';
 import { requireAuth, signToken } from '../../middleware/auth.js';
+import { notify } from '../notifications/notifications.service.js';
 import { createUser, toPublicUser, verifyLogin } from './auth.service.js';
 
 const registerSchema = z.object({
@@ -36,6 +37,7 @@ authRouter.post(
   wrap(async (req, res) => {
     const input = parse(registerSchema, req.body);
     const user = await createUser(input);
+    await notify({ userId: user.id, category: 'account', type: 'account_created', title: 'Account created', body: 'Welcome. Your account can back campaigns, create them and follow their progress.' });
     res.status(201).json({ token: signToken(user.id), user: toPublicUser(user) });
   }),
 );
@@ -66,6 +68,9 @@ authRouter.patch(
     if (input.name) user.name = input.name;
     if (input.notificationPrefs) user.notificationPrefs = input.notificationPrefs;
     await db.put('users', user);
+    if (input.name && input.name !== req.user!.name) {
+      await notify({ userId: user.id, category: 'account', type: 'account_name_changed', title: 'Account details changed', body: 'Your display name was updated. If this was not you, sign out and sign in again.' });
+    }
     res.json({ user: toPublicUser(user) });
   }),
 );

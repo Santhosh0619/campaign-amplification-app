@@ -1,25 +1,40 @@
-import { useState } from 'react';
 import { Linking, Pressable, Share, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Bookmark, Share2, ThumbsDown, ThumbsUp } from 'lucide-react-native';
 import { api, errorMessage } from '@/api/client';
-import { useBackers, useCampaign, useComments, useReports } from '@/api/hooks';
+import { useBackers, useCampaign, useReports } from '@/api/hooks';
 import { AdPreview } from '@/components/campaign/AdPreview';
 import { ChoiceRow } from '@/components/campaign/ChoiceRow';
 import { CoverArt } from '@/components/campaign/CoverArt';
 import { FundingBar } from '@/components/campaign/FundingBar';
 import { ReportCard } from '@/components/campaign/ReportCard';
+import { CommentThread } from '@/components/campaign/CommentThread';
 import { StoryRenderer } from '@/components/campaign/StoryRenderer';
 import { TrustBlock } from '@/components/campaign/TrustBlock';
 import { UseOfFunds } from '@/components/campaign/UseOfFunds';
-import { Accordion, Button, Divider, ErrorState, Field, Screen, ScreenHeader, Skeleton, StatusChip, Text } from '@/components/ui';
+import { Accordion, Divider, ErrorState, Screen, ScreenHeader, Skeleton, StatusChip, Text } from '@/components/ui';
 import { useAuthGate } from '@/hooks/useAuthGate';
-import { number, shortDate, statusLabel, timeAgo } from '@/lib/format';
-import { useAuth } from '@/store/auth';
+import { number, shortDate, statusLabel } from '@/lib/format';
 import { toast } from '@/store/toast';
 import { layout, space, useTheme } from '@/theme';
 import type { CampaignDetail, CampaignDetailResponse } from '@/types/api';
+
+const partnerMap: Record<string, string> = {
+  Facebook: 'Meta (Facebook)',
+  Instagram: 'Meta (Instagram)',
+  YouTube: 'Google (YouTube)',
+  Reddit: 'Reddit Ads',
+  LinkedIn: 'LinkedIn Campaign Manager',
+  X: 'X Ads',
+  TikTok: 'TikTok Ads',
+  Pinterest: 'Pinterest Ads',
+};
+
+function partnersFor(platforms: string[]) {
+  if (platforms.length === 0) return 'Ad networks are chosen by the creator and confirmed in review.';
+  return `Ads would run through: ${platforms.map((p) => partnerMap[p] ?? p).join(', ')}. Ads are created paused and activated by a person after approval. (Prototype: no live ad accounts are connected.)`;
+}
 
 const isFundingState = (s: string) => ['available_for_funding', 'goal_reached', 'distribution_preparation', 'promoting', 'completed'].includes(s);
 
@@ -29,13 +44,9 @@ export function CampaignDetailScreen() {
   const { colors } = useTheme();
   const qc = useQueryClient();
   const gate = useAuthGate();
-  const user = useAuth((s) => s.user);
   const query = useCampaign(String(slug));
   const reports = useReports(String(slug));
   const backers = useBackers(String(slug));
-  const comments = useComments(String(slug));
-  const [commentText, setCommentText] = useState('');
-  const [commentError, setCommentError] = useState<string | null>(null);
 
   const refresh = () => qc.invalidateQueries({ queryKey: ['campaigns'] });
 
@@ -57,17 +68,6 @@ export function CampaignDetailScreen() {
     },
     onError: (e) => toast.error(errorMessage(e)),
   });
-  const post = useMutation({
-    mutationFn: () => api(`/campaigns/${slug}/comments`, { method: 'POST', body: { body: commentText } }),
-    onSuccess: () => {
-      setCommentText('');
-      setCommentError(null);
-      toast.success('Comment posted.');
-      void qc.invalidateQueries({ queryKey: ['campaigns', 'comments', String(slug)] });
-    },
-    onError: (e) => setCommentError(errorMessage(e)),
-  });
-
   if (query.isLoading) {
     return (
       <Screen edges={['top']}>
@@ -296,6 +296,18 @@ export function CampaignDetailScreen() {
               Every campaign is checked against its listed sources before it is published. This one has no published review yet, so no score is shown.
             </Text>
           )}
+          <View style={{ gap: 4 }}>
+            <Text variant="label">Verification information</Text>
+            <Text variant="bodySm" tone="muted">
+              {c.sources.length} source{c.sources.length === 1 ? '' : 's'} listed by the creator.{c.review.reviewedAt ? ` Reviewed on ${shortDate(c.review.reviewedAt)}.` : ''} This is a platform review of the evidence provided. It is not independent third-party verification.
+            </Text>
+          </View>
+          <View style={{ gap: 4 }}>
+            <Text variant="label">Distribution partners</Text>
+            <Text variant="bodySm" tone="muted">
+              {partnersFor(c.platforms)}
+            </Text>
+          </View>
         </Accordion>
         <Accordion title="Who is helping spread this message?" meta={backers.data ? String(backers.data.total) : undefined}>
           {backers.isLoading ? (
@@ -338,49 +350,7 @@ export function CampaignDetailScreen() {
             onChange={(value) => feedback.mutate({ kind: 'mind_changed', value })}
           />
 
-          <View style={{ gap: space.md }}>
-            <Text variant="title">Comments</Text>
-            {user ? (
-              <View style={{ gap: space.md }}>
-                <Field
-                  label="Add a comment"
-                  value={commentText}
-                  onChangeText={(t) => {
-                    setCommentText(t);
-                    setCommentError(null);
-                  }}
-                  multiline
-                  minHeight={84}
-                  maxLength={600}
-                  showCounter
-                  error={commentError}
-                  placeholder="Share what you think"
-                />
-                <Button label="Post comment" size="sm" variant="dark" loading={post.isPending} disabled={commentText.trim().length < 2} onPress={() => post.mutate()} fullWidth={false} />
-              </View>
-            ) : (
-              <Button label="Sign in to comment" variant="secondary" onPress={() => router.push('/auth')} />
-            )}
-            {comments.isLoading ? (
-              <Skeleton height={40} />
-            ) : (comments.data?.items.length ?? 0) === 0 ? (
-              <Text variant="bodySm" tone="muted">
-                No comments yet. Be the first to share what you think.
-              </Text>
-            ) : (
-              comments.data!.items.map((cm) => (
-                <View key={cm.id} style={[styles.comment, { borderColor: colors.rule }]}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text variant="label">{cm.authorName}</Text>
-                    <Text variant="caption" tone="muted">
-                      {timeAgo(cm.createdAt)}
-                    </Text>
-                  </View>
-                  <Text variant="bodySm">{cm.body}</Text>
-                </View>
-              ))
-            )}
-          </View>
+          <CommentThread slug={String(slug)} />
 
           {c.isDemo ? (
             <Text variant="caption" tone="muted">

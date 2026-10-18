@@ -77,7 +77,7 @@ export function useBackers(slug: string) {
   });
 }
 
-export type CommentItem = { id: string; authorName: string; body: string; createdAt: string };
+export type CommentItem = { id: string; authorName: string; body: string; createdAt: string; parentId: string | null; mine: boolean; reportedByMe: boolean };
 
 export function useComments(slug: string) {
   return useQuery({ queryKey: ['campaigns', 'comments', slug], queryFn: () => api<{ items: CommentItem[] }>(`/campaigns/${slug}/comments`), enabled: Boolean(slug) });
