@@ -26,9 +26,6 @@
       "expo-image",
       "expo-secure-store"
     ],
-    "scheme": "campaign",
-    "experiments": {
-      "typedRoutes": true
-    }
+    "scheme": "campaign"
   }
 }
