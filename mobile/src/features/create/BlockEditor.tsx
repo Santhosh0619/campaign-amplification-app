@@ -1,5 +1,6 @@
+import { useRef } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { ArrowDown, ArrowUp, Trash2 } from 'lucide-react-native';
+import { ArrowDown, ArrowUp, Bold, Italic, Trash2 } from 'lucide-react-native';
 import { Chip, Field, Text } from '@/components/ui';
 import { space, useTheme } from '@/theme';
 import type { StoryBlock } from '@/types/api';
@@ -29,6 +30,18 @@ const names: Record<StoryBlock['type'], string> = {
 /** Article-style composer: ordered blocks the creator can add, edit, move and remove. */
 export function BlockEditor({ blocks, onChange, error }: Props) {
   const { colors } = useTheme();
+  const selections = useRef<Record<string, { start: number; end: number }>>({});
+
+  /** Wraps the selected words (or a placeholder) in **bold** or _italic_ markers. */
+  const format = (id: string, marker: '**' | '_') => {
+    const block = blocks.find((b) => b.id === id);
+    if (!block) return;
+    const text = block.text ?? '';
+    const sel = selections.current[id] ?? { start: text.length, end: text.length };
+    const picked = text.slice(sel.start, sel.end) || 'text';
+    const next = `${text.slice(0, sel.start)}${marker}${picked}${marker}${text.slice(sel.end)}`;
+    onChange(blocks.map((b) => (b.id === id ? { ...b, text: next } : b)));
+  };
 
   const patch = (id: string, p: Partial<StoryBlock>) => onChange(blocks.map((b) => (b.id === id ? { ...b, ...p } : b)));
   const remove = (id: string) => onChange(blocks.filter((b) => b.id !== id));
@@ -70,7 +83,30 @@ export function BlockEditor({ blocks, onChange, error }: Props) {
           </View>
 
           {b.type === 'paragraph' ? (
-            <Field label="Text" value={b.text ?? ''} onChangeText={(t) => patch(b.id, { text: t })} multiline minHeight={110} maxLength={4000} />
+            <View style={{ gap: space.sm }}>
+              <View style={styles.toolbar}>
+                <Pressable onPress={() => format(b.id, '**')} accessibilityRole="button" accessibilityLabel="Make selected text bold" style={[styles.fmt, { borderColor: colors.rule }]}>
+                  <Bold size={16} color={colors.ink} strokeWidth={2} />
+                </Pressable>
+                <Pressable onPress={() => format(b.id, '_')} accessibilityRole="button" accessibilityLabel="Make selected text italic" style={[styles.fmt, { borderColor: colors.rule }]}>
+                  <Italic size={16} color={colors.ink} strokeWidth={2} />
+                </Pressable>
+                <Text variant="caption" tone="muted" style={{ flex: 1 }}>
+                  Select words, then tap. Shown as **bold** or _italic_.
+                </Text>
+              </View>
+              <Field
+                label="Text"
+                value={b.text ?? ''}
+                onChangeText={(t) => patch(b.id, { text: t })}
+                onSelectionChange={(e) => {
+                  selections.current[b.id] = e.nativeEvent.selection;
+                }}
+                multiline
+                minHeight={110}
+                maxLength={4000}
+              />
+            </View>
           ) : null}
           {b.type === 'heading' ? <Field label="Heading" value={b.text ?? ''} onChangeText={(t) => patch(b.id, { text: t })} maxLength={120} /> : null}
           {b.type === 'stat' ? (
@@ -136,4 +172,6 @@ const styles = StyleSheet.create({
   blockHead: { flexDirection: 'row', alignItems: 'center' },
   icon: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   adds: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
+  toolbar: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  fmt: { width: 40, height: 40, borderWidth: 1, borderRadius: 6, alignItems: 'center', justifyContent: 'center' },
 });

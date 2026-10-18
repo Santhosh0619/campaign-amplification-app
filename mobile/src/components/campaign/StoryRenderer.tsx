@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { assetUrl } from '@/api/client';
-import { Text } from '@/components/ui';
+import { RichText, Text } from '@/components/ui';
 import { radius, space, useTheme } from '@/theme';
 import type { StoryBlock } from '@/types/api';
 
@@ -21,9 +21,9 @@ export function StoryRenderer({ blocks }: { blocks: StoryBlock[] }) {
             ) : null;
           case 'paragraph':
             return b.text ? (
-              <Text key={b.id} variant="body" style={styles.paragraph}>
+              <RichText key={b.id} variant="body" style={styles.paragraph}>
                 {b.text}
-              </Text>
+              </RichText>
             ) : null;
           case 'stat':
             return (
@@ -55,9 +55,9 @@ export function StoryRenderer({ blocks }: { blocks: StoryBlock[] }) {
                 {(b.items ?? []).map((item, i) => (
                   <View key={`${b.id}-${i}`} style={styles.listRow}>
                     <View style={[styles.bullet, { backgroundColor: colors.ink }]} />
-                    <Text variant="body" style={{ flex: 1 }}>
+                    <RichText variant="body" style={{ flex: 1 }}>
                       {item}
-                    </Text>
+                    </RichText>
                   </View>
                 ))}
               </View>

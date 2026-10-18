@@ -13,3 +13,4 @@ export { Screen } from './Screen';
 export { ScreenHeader } from './ScreenHeader';
 export { ToastHost } from './ToastHost';
 export { ListRow } from './ListRow';
+export { RichText, parseInline } from './RichText';

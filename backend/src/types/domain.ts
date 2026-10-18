@@ -43,6 +43,14 @@ export type AdCreative = {
   headline: string;
   primaryText: string;
   image?: Cover;
+  videoUrl?: string;
+};
+
+export type ReachTargeting = {
+  locations: string[];
+  interests: string[];
+  /** Share of the ad budget per platform, in whole percent. Sums to 100 when two or more platforms are chosen. */
+  budget: Record<string, number>;
 };
 
 export type TrustReview = {
@@ -81,6 +89,8 @@ export type Campaign = {
   targetAudience: string;
   whyItMatters: string;
   platforms: string[];
+  reach: ReachTargeting;
+  suggestedActions: string[];
   storySummary: { about: string; whoFor: string; whyMatters: string; sameForBackers: boolean };
   raisedAmount: number;
   backersCount: number;

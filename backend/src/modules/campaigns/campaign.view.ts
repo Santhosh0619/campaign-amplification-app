@@ -43,6 +43,8 @@ export function toDetail(c: Campaign, viewerId?: string) {
     targetAudience: c.targetAudience,
     whyItMatters: c.whyItMatters,
     platforms: c.platforms,
+    reach: c.reach ?? { locations: [], interests: [], budget: {} },
+    suggestedActions: c.suggestedActions ?? [],
     storySummary: c.storySummary,
     review: { reviewedAt: c.review.reviewedAt ?? null, trust: c.review.trust ?? null },
     publishedAt: c.publishedAt ?? null,

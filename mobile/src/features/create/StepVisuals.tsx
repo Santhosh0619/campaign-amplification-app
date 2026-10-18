@@ -148,6 +148,18 @@ export function StepVisuals({ form, update, problems }: Props) {
           </View>
         ) : null}
 
+        <Field
+          label="Video creative (optional)"
+          value={ad.videoUrl ?? ''}
+          onChangeText={(t) => setAd({ videoUrl: t })}
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="url"
+          maxLength={300}
+          placeholder="https://"
+          hint="A link to a short video. Used only on networks that support video ads; others use your image."
+        />
+
         <AdPreview
           primaryText={ad.useOwn ? ad.primaryText : form.shortDescription}
           headline={ad.useOwn ? ad.headline : form.title.slice(0, 40)}
@@ -164,6 +176,12 @@ export function StepVisuals({ form, update, problems }: Props) {
             No cover yet. The preview shows a placeholder until you add one.
           </Text>
         ) : null}
+        <View style={[styles.quality, { borderColor: colors.rule }]}>
+          <Text variant="label">A quick check before you move on</Text>
+          <Text variant="bodySm" tone="muted">
+            Would someone scrolling past stop on this image and read the first line? Aim for one clear subject, little text on the picture, and wording that says what the page is about.
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -171,5 +189,6 @@ export function StepVisuals({ form, update, problems }: Props) {
 
 const styles = StyleSheet.create({
   actions: { flexDirection: 'row', gap: 8 },
+  quality: { borderTopWidth: 1, paddingTop: space.md, gap: 4 },
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: space.lg, paddingVertical: space.md, borderTopWidth: 1, borderBottomWidth: 1 },
 });

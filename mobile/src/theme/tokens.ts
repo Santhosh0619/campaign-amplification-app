@@ -50,6 +50,7 @@ export const fonts = {
   serifSemi: 'Newsreader_600SemiBold',
   serifItalic: 'Newsreader_400Regular_Italic',
   sans: 'PublicSans_400Regular',
+  sansItalic: 'PublicSans_400Regular_Italic',
   sansMedium: 'PublicSans_500Medium',
   sansSemi: 'PublicSans_600SemiBold',
   sansBold: 'PublicSans_700Bold',

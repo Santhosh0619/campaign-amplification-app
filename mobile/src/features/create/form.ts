@@ -1,4 +1,4 @@
-import type { AdCreative, CampaignDraft, Cover, Source, StoryBlock } from '@/types/api';
+import type { AdCreative, CampaignDraft, Cover, ReachTargeting, Source, StoryBlock } from '@/types/api';
 
 /** The part of a campaign the creator edits. Mirrors the backend draft schema. */
 export type DraftForm = {
@@ -16,6 +16,8 @@ export type DraftForm = {
   targetAudience: string;
   whyItMatters: string;
   platforms: string[];
+  reach: ReachTargeting;
+  suggestedActions: string[];
   storySummary: { about: string; whoFor: string; whyMatters: string; sameForBackers: boolean };
 };
 
@@ -38,9 +40,21 @@ export function formFromDraft(d: CampaignDraft): DraftForm {
     targetAudience: d.targetAudience,
     whyItMatters: d.whyItMatters,
     platforms: d.platforms,
+    reach: d.reach ?? { locations: [], interests: [], budget: evenSplit(d.platforms) },
+    suggestedActions: d.suggestedActions ?? [],
     storySummary: d.storySummary,
   };
 }
+
+/** Splits 100% across platforms as evenly as whole numbers allow (the first platforms take the remainder). */
+export function evenSplit(platforms: string[]): Record<string, number> {
+  if (platforms.length === 0) return {};
+  const base = Math.floor(100 / platforms.length);
+  let extra = 100 - base * platforms.length;
+  return Object.fromEntries(platforms.map((p) => [p, base + (extra-- > 0 ? 1 : 0)]));
+}
+
+export const budgetTotal = (f: Pick<DraftForm, 'platforms' | 'reach'>) => f.platforms.reduce((s, p) => s + (f.reach.budget[p] ?? 0), 0);
 
 export const newBlockId = () => `blk_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
@@ -83,6 +97,7 @@ export function validateStep(step: StepIndex, f: DraftForm, minGoal: number, ter
   if (step === 3) {
     if (f.platforms.length === 0) p.platforms = 'Choose at least one ad platform.';
     if (!f.targetAudience.trim()) p.targetAudience = 'Describe who this should reach.';
+    if (f.platforms.length > 1 && budgetTotal(f) !== 100) p.budget = 'Budget shares must add up to 100%.';
   }
   if (step === 4) {
     if (!f.goalAmount || f.goalAmount < minGoal) p.goalAmount = `Set a funding goal of at least $${minGoal}.`;
@@ -95,7 +110,7 @@ export const stepOfProblem = (key: string): StepIndex => {
   if (['title', 'category', 'creatorName'].includes(key)) return 0;
   if (['shortDescription', 'story'].includes(key) || key.startsWith('source_')) return 1;
   if (['cover', 'coverRights', 'adHeadline', 'adPrimaryText', 'adImageRights'].includes(key)) return 2;
-  if (['platforms', 'targetAudience'].includes(key)) return 3;
+  if (['platforms', 'targetAudience', 'budget'].includes(key)) return 3;
   return 4;
 };
 

@@ -47,12 +47,19 @@ export const draftSchema = z
       headline: z.string().max(40),
       primaryText: z.string().max(125),
       image: coverSchema.optional(),
+      videoUrl: z.string().max(300).optional(),
     }),
     goalAmount: z.number().min(0).max(1_000_000).nullable(),
     fundingWindow: z.union([z.literal(14), z.literal(30), z.literal(45), z.literal(60), z.literal('evergreen')]),
     targetAudience: z.string().max(600),
     whyItMatters: z.string().max(600),
     platforms: z.array(z.enum(adPlatforms)).max(8),
+    reach: z.object({
+      locations: z.array(z.string().trim().min(1).max(60)).max(12),
+      interests: z.array(z.string().trim().min(1).max(40)).max(12),
+      budget: z.record(z.string(), z.number().int().min(0).max(100)),
+    }),
+    suggestedActions: z.array(z.string().max(200)).max(5),
     storySummary: z.object({
       about: z.string().max(600),
       whoFor: z.string().max(600),
@@ -83,6 +90,7 @@ export function submitProblems(c: {
   goalAmount: number;
   platforms: string[];
   targetAudience: string;
+  reach: { budget: Record<string, number> };
 }): Record<string, string> {
   const p: Record<string, string> = {};
   if (!c.title.trim()) p.title = 'Add a campaign title.';
@@ -99,6 +107,10 @@ export function submitProblems(c: {
   }
   if (c.platforms.length === 0) p.platforms = 'Choose at least one ad platform.';
   if (!c.targetAudience.trim()) p.targetAudience = 'Describe who this should reach.';
+  if (c.platforms.length > 1) {
+    const total = c.platforms.reduce((sum, name) => sum + (c.reach.budget[name] ?? 0), 0);
+    if (total !== 100) p.budget = 'Budget shares across your platforms must add up to 100%.';
+  }
   if (!c.goalAmount || c.goalAmount < rules.minGoal) p.goalAmount = `Set a funding goal of at least $${rules.minGoal}.`;
   return p;
 }
