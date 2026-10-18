@@ -91,18 +91,21 @@ export function CreateEntryScreen() {
           <ArrowRight size={22} color={colors.ink} strokeWidth={1.75} />
         </Pressable>
 
-        <View style={[styles.option, { borderColor: colors.rule, backgroundColor: 'transparent' }]} accessibilityLabel="Create with your voice, coming soon">
-          <Mic size={26} color={colors.inkMuted} strokeWidth={1.5} />
+        <Pressable
+          onPress={() => router.push('/create/voice')}
+          accessibilityRole="button"
+          accessibilityLabel="Create with your voice"
+          style={({ pressed }) => [styles.option, { borderColor: colors.ink, backgroundColor: colors.surface, opacity: pressed ? 0.85 : 1 }]}
+        >
+          <Mic size={26} color={colors.ink} strokeWidth={1.5} />
           <View style={{ flex: 1, gap: 2 }}>
-            <Text variant="heading" tone="muted">
-              Create with your voice
-            </Text>
+            <Text variant="heading">Create with your voice</Text>
             <Text variant="bodySm" tone="muted">
-              Answer a few questions out loud and we fill in the steps. Coming soon. For now, step one can draft everything from a short description.
+              Answer four questions out loud and we fill in the steps. You land on a draft you can edit before submitting.
             </Text>
           </View>
-          <StatusChip label="Soon" />
-        </View>
+          <ArrowRight size={22} color={colors.ink} strokeWidth={1.75} />
+        </Pressable>
 
         <View style={{ gap: space.md }}>
           <Text variant="title">Your drafts</Text>

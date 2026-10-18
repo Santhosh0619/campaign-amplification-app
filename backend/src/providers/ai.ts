@@ -86,3 +86,33 @@ export function draftFromPrompt(prompt: string): AiDraft {
     },
   };
 }
+
+export type VoiceAnswers = { about: string; audience: string; why: string; evidence: string };
+
+export type VoiceDraft = AiDraft & { sources: { id: string; title: string; url: string }[] };
+
+/** Builds a draft from the four guided interview answers. URLs mentioned as evidence become listed sources. */
+export function draftFromAnswers(a: VoiceAnswers): VoiceDraft {
+  const about = a.about.trim();
+  const base = draftFromPrompt([about, a.why.trim()].filter(Boolean).join(' '));
+  const urls = [...new Set((a.evidence.match(/https?:\/\/[^\s,)]+/g) ?? []).map((u) => u.replace(/[.;]+$/, '')))];
+  const evidenceText = a.evidence.replace(/https?:\/\/[^\s,)]+/g, '').replace(/\s+/g, ' ').trim();
+
+  const story: StoryBlock[] = [...base.story];
+  if (a.audience.trim()) story.push({ id: newId('blk'), type: 'paragraph', text: `**Who this is for.** ${a.audience.trim()}` });
+  if (evidenceText) story.push({ id: newId('blk'), type: 'paragraph', text: `**What the evidence says.** ${evidenceText}` });
+
+  return {
+    ...base,
+    story,
+    targetAudience: clip(a.audience.trim() || base.targetAudience, 600),
+    whyItMatters: clip(a.why.trim() || base.whyItMatters, 600),
+    storySummary: {
+      about: clip(about || base.storySummary.about, 600),
+      whoFor: clip(a.audience.trim() || base.storySummary.whoFor, 600),
+      whyMatters: clip(a.why.trim() || base.storySummary.whyMatters, 600),
+      sameForBackers: true,
+    },
+    sources: urls.slice(0, 5).map((url) => ({ id: newId('src'), title: url.replace(/^https?:\/\//, '').slice(0, 60), url })),
+  };
+}
