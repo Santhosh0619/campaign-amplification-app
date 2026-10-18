@@ -1,9 +1,5 @@
-import { EmptyState, Screen } from '@/components/ui';
+import { ProfileScreen } from '@/features/profile/ProfileScreen';
 
-export default function ProfileScreen() {
-  return (
-    <Screen>
-      <EmptyState title="Profile" message="This screen is built in an upcoming feature." />
-    </Screen>
-  );
+export default function Profile() {
+  return <ProfileScreen />;
 }

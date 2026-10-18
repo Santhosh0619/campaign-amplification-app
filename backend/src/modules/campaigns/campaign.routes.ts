@@ -5,7 +5,8 @@ import { env } from '../../config/env.js';
 import { db } from '../../db/index.js';
 import { badRequest, forbidden, notFound, parse, wrap } from '../../lib/errors.js';
 import { optionalAuth, requireAuth } from '../../middleware/auth.js';
-import type { Campaign, Feedback, Reaction, Saved } from '../../types/domain.js';
+import type { Campaign, Feedback, Reaction, Report, Saved } from '../../types/domain.js';
+import { newId, nowIso } from '../../lib/ids.js';
 import { demoAdvance, EDITABLE, submitCampaign, type DemoAction } from './campaign.lifecycle.js';
 import { draftSchema, submitProblems, submitSchema } from './campaign.schema.js';
 import { blankCampaign, findCampaign, findOwned, isPublic, listPublic, mergeDraft, uniqueSlug } from './campaign.service.js';
@@ -170,6 +171,25 @@ campaignRouter.post(
     const { action } = parse(advanceSchema, req.body ?? {});
     const next = await demoAdvance(c, action as DemoAction);
     res.json({ campaign: toOwnerView(next) });
+  }),
+);
+
+const updateSchema = z.object({
+  title: z.string().trim().min(3, 'Add a short title.').max(80),
+  body: z.string().trim().min(10, 'Write at least a sentence.').max(1200),
+});
+
+/** The creator posts a progress update that backers can read on the campaign page. */
+campaignRouter.post(
+  '/:id/updates',
+  requireAuth,
+  wrap(async (req, res) => {
+    const c = await findOwned(String(req.params.id), req.user!);
+    if (!isPublic(c)) throw badRequest('You can post updates once the campaign is live.');
+    const input = parse(updateSchema, req.body);
+    const report: Report = { id: newId('rpt'), campaignId: c.id, kind: 'update', title: input.title, body: input.body, createdAt: nowIso() };
+    await db.put('reports', report);
+    res.status(201).json({ report });
   }),
 );
 

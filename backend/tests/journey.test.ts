@@ -195,3 +195,17 @@ describe('impact and profile', () => {
     expect(statuses).toEqual(expect.arrayContaining(['submitted', 'changes_requested', 'available_for_funding', 'promoting', 'completed']));
   });
 });
+
+describe('creator updates', () => {
+  it('lets only the owner post an update on a live campaign', async () => {
+    const login = await request(app).post(api('/auth/login')).send({ email: DEMO_EMAIL, password: DEMO_PASSWORD });
+    const owner = { Authorization: `Bearer ${login.body.token}` };
+    const ok = await request(app).post(api('/campaigns/night-bus-tickets/updates')).set(owner).send({ title: 'Halfway there', body: 'We have passed a third of the goal this week.' });
+    expect(ok.status).toBe(201);
+    const stranger = await signUp('stranger@example.com');
+    const denied = await request(app).post(api('/campaigns/night-bus-tickets/updates')).set({ Authorization: `Bearer ${stranger}` }).send({ title: 'Hi there', body: 'Not my campaign at all.' });
+    expect(denied.status).toBe(403);
+    const reports = await request(app).get(api('/campaigns/night-bus-tickets/reports'));
+    expect(reports.body.items.some((r: { kind: string }) => r.kind === 'update')).toBe(true);
+  });
+});
