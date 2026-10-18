@@ -59,7 +59,8 @@ export type TrustReview = {
   sharedReality: { score: number; note: string };
 };
 
-export type AdCreative = { useOwn: boolean; headline: string; primaryText: string; image?: Cover };
+export type AdCreative = { useOwn: boolean; headline: string; primaryText: string; image?: Cover; videoUrl?: string };
+export type ReachTargeting = { locations: string[]; interests: string[]; budget: Record<string, number> };
 
 export type CampaignDetail = CampaignCard & {
   story: StoryBlock[];
@@ -69,6 +70,8 @@ export type CampaignDetail = CampaignCard & {
   targetAudience: string;
   whyItMatters: string;
   platforms: string[];
+  reach: ReachTargeting;
+  suggestedActions: string[];
   storySummary: { about: string; whoFor: string; whyMatters: string; sameForBackers: boolean };
   review: { reviewedAt: string | null; trust: TrustReview | null };
   publishedAt: string | null;
@@ -98,6 +101,8 @@ export type CampaignDraft = {
   targetAudience: string;
   whyItMatters: string;
   platforms: string[];
+  reach?: ReachTargeting;
+  suggestedActions?: string[];
   storySummary: { about: string; whoFor: string; whyMatters: string; sameForBackers: boolean };
   raisedAmount: number;
   backersCount: number;

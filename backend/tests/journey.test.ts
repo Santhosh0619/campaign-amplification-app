@@ -209,3 +209,35 @@ describe('creator updates', () => {
     expect(reports.body.items.some((r: { kind: string }) => r.kind === 'update')).toBe(true);
   });
 });
+
+describe('reach targeting', () => {
+  it('requires budget shares to add up to 100 across several platforms', async () => {
+    const token = await signUp('budget@example.com');
+    const auth = { Authorization: `Bearer ${token}` };
+    const created = await request(app).post(api('/campaigns')).set(auth).send({});
+    const id = created.body.campaign.id as string;
+    await request(app)
+      .patch(api(`/campaigns/${id}`))
+      .set(auth)
+      .send({
+        title: 'Budget check',
+        category: 'Civic',
+        creatorName: 'Test',
+        shortDescription: 'Short.',
+        story: [{ id: 'b', type: 'paragraph', text: 'A paragraph long enough to count as a story.' }],
+        cover: { generated: true },
+        targetAudience: 'Voters',
+        goalAmount: 300,
+        platforms: ['Facebook', 'Instagram'],
+        reach: { locations: ['Canada'], interests: ['Civic life'], budget: { Facebook: 70, Instagram: 20 } },
+        suggestedActions: ['Share it'],
+      })
+      .expect(200);
+    const bad = await request(app).post(api(`/campaigns/${id}/submit`)).set(auth).send({ termsAccepted: true });
+    expect(bad.status).toBe(400);
+    expect(bad.body.fields.budget).toBeTruthy();
+    await request(app).patch(api(`/campaigns/${id}`)).set(auth).send({ reach: { locations: ['Canada'], interests: [], budget: { Facebook: 70, Instagram: 30 } } }).expect(200);
+    const ok = await request(app).post(api(`/campaigns/${id}/submit`)).set(auth).send({ termsAccepted: true });
+    expect(ok.status).toBe(200);
+  });
+});

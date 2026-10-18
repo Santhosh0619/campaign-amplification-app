@@ -437,6 +437,8 @@ function toCampaign(s: Seed | DemoOwned, ownerId: string, status: CampaignStatus
     targetAudience: s.audience,
     whyItMatters: s.matters,
     platforms: s.platforms ?? ['Facebook', 'Instagram'],
+    reach: { locations: ['United States'], interests: [s.category], budget: (s.platforms ?? ['Facebook', 'Instagram']).length > 1 ? { Facebook: 60, Instagram: 40 } : { [(s.platforms ?? ['Facebook'])[0]]: 100 } },
+    suggestedActions: ['Share this page with someone who should see it', 'Read the sources before you decide what you think'],
     storySummary: { about: s.short, whoFor: s.audience, whyMatters: s.matters, sameForBackers: true },
     raisedAmount: s.raised,
     backersCount: s.backers,

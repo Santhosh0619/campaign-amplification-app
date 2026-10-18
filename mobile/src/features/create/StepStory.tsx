@@ -55,6 +55,28 @@ export function StepStory({ form, update, problems }: Props) {
         <SourcesEditor sources={form.sources} onChange={(sources) => update({ sources })} problems={problems} />
       </View>
 
+      <View style={{ gap: space.md }}>
+        <View style={{ gap: 2 }}>
+          <Text variant="heading">What should readers do?</Text>
+          <Text variant="caption" tone="muted">
+            Suggested actions for people who read your story, such as sharing, contacting someone or reading a source. Up to five.
+          </Text>
+        </View>
+        {form.suggestedActions.map((a, i) => (
+          <View key={i} style={{ gap: space.xs }}>
+            <Field
+              label={`Action ${i + 1}`}
+              value={a}
+              onChangeText={(t) => update({ suggestedActions: form.suggestedActions.map((x, j) => (j === i ? t : x)) })}
+              maxLength={200}
+              placeholder="e.g. Email your school board member"
+            />
+            <Button label="Remove" variant="ghost" size="sm" onPress={() => update({ suggestedActions: form.suggestedActions.filter((_, j) => j !== i) })} fullWidth={false} />
+          </View>
+        ))}
+        {form.suggestedActions.length < 5 ? <Button label="+ Add a suggested action" variant="secondary" onPress={() => update({ suggestedActions: [...form.suggestedActions, ''] })} /> : null}
+      </View>
+
       <Field
         label="Why should backers care?"
         value={form.whyBackersCare}

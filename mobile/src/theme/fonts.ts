@@ -5,6 +5,7 @@ import {
 } from '@expo-google-fonts/newsreader';
 import {
   PublicSans_400Regular,
+  PublicSans_400Regular_Italic,
   PublicSans_500Medium,
   PublicSans_600SemiBold,
   PublicSans_700Bold,
@@ -15,6 +16,7 @@ export const fontSources = {
   Newsreader_500Medium,
   Newsreader_600SemiBold,
   PublicSans_400Regular,
+  PublicSans_400Regular_Italic,
   PublicSans_500Medium,
   PublicSans_600SemiBold,
   PublicSans_700Bold,

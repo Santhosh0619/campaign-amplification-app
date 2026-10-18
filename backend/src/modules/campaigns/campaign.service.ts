@@ -26,6 +26,8 @@ export function blankCampaign(user: User): Campaign {
     targetAudience: '',
     whyItMatters: '',
     platforms: ['Facebook'],
+    reach: { locations: [], interests: [], budget: { Facebook: 100 } },
+    suggestedActions: [],
     storySummary: { about: '', whoFor: '', whyMatters: '', sameForBackers: true },
     raisedAmount: 0,
     backersCount: 0,
@@ -37,13 +39,22 @@ export function blankCampaign(user: User): Campaign {
   };
 }
 
+/** Campaigns saved before a field existed get safe defaults, so old data never breaks new screens. */
+export function withDefaults(c: Campaign): Campaign {
+  return {
+    ...c,
+    reach: c.reach ?? { locations: [], interests: [], budget: Object.fromEntries(c.platforms.map((p, _i, arr) => [p, Math.round(100 / arr.length)])) },
+    suggestedActions: c.suggestedActions ?? [],
+  };
+}
+
 export async function findCampaign(idOrSlug: string): Promise<Campaign> {
   const direct = await db.get<Campaign>('campaigns', idOrSlug);
-  if (direct) return direct;
+  if (direct) return withDefaults(direct);
   const all = await db.list<Campaign>('campaigns');
   const bySlug = all.find((c) => c.slug === idOrSlug);
   if (!bySlug) throw notFound('Campaign not found.');
-  return bySlug;
+  return withDefaults(bySlug);
 }
 
 export async function findOwned(idOrSlug: string, user: User): Promise<Campaign> {
@@ -80,6 +91,8 @@ export function mergeDraft(c: Campaign, input: DraftInput): Campaign {
   if (input.targetAudience !== undefined) next.targetAudience = input.targetAudience;
   if (input.whyItMatters !== undefined) next.whyItMatters = input.whyItMatters;
   if (input.platforms !== undefined) next.platforms = input.platforms;
+  if (input.reach !== undefined) next.reach = input.reach;
+  if (input.suggestedActions !== undefined) next.suggestedActions = input.suggestedActions;
   if (input.storySummary !== undefined) next.storySummary = input.storySummary;
   return next;
 }

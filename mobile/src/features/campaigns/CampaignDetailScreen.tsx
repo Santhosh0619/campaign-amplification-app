@@ -205,6 +205,23 @@ export function CampaignDetailScreen() {
           The story
         </Text>
         <StoryRenderer blocks={c.story} />
+        {(c.suggestedActions ?? []).filter((a) => a.trim()).length > 0 ? (
+          <View style={[styles.actionsBox, { borderColor: colors.ink }]}>
+            <Text variant="kicker" tone="action">
+              What you can do
+            </Text>
+            {c.suggestedActions.filter((a) => a.trim()).map((a, i) => (
+              <View key={i} style={{ flexDirection: 'row', gap: space.md }}>
+                <Text variant="number" tone="action" style={{ width: 22, fontSize: 18 }}>
+                  {i + 1}
+                </Text>
+                <Text variant="body" style={{ flex: 1 }}>
+                  {a}
+                </Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
       </View>
 
       <View style={[styles.pad, { marginTop: space.x3 }]}>
@@ -254,6 +271,16 @@ export function CampaignDetailScreen() {
           <Text variant="bodySm" tone="muted">
             Audience: {c.targetAudience || 'Chosen by the creator and finalised during review.'}
           </Text>
+          {c.reach && (c.reach.locations.length > 0 || c.reach.interests.length > 0) ? (
+            <Text variant="bodySm" tone="muted">
+              {[c.reach.locations.length ? `Places: ${c.reach.locations.join(', ')}` : null, c.reach.interests.length ? `Interests: ${c.reach.interests.join(', ')}` : null].filter(Boolean).join(' · ')}
+            </Text>
+          ) : null}
+          {c.platforms.length > 1 && c.reach && Object.keys(c.reach.budget).length > 0 ? (
+            <Text variant="bodySm" tone="muted">
+              Budget split: {c.platforms.map((p) => `${p} ${c.reach.budget[p] ?? 0}%`).join(', ')}
+            </Text>
+          ) : null}
           <Text variant="bodySm" tone="muted">
             Reach is bought by grouped location, interests and age ranges, never using personal information about individuals. Clicking the ad opens this page.
           </Text>
@@ -374,4 +401,5 @@ const styles = StyleSheet.create({
   react: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44, paddingHorizontal: space.md, borderWidth: 1, borderColor: 'transparent', borderRadius: 6 },
   source: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingVertical: space.md, borderTopWidth: 1 },
   comment: { gap: 4, borderTopWidth: 1, paddingTop: space.md },
+  actionsBox: { borderTopWidth: 2, paddingTop: space.md, gap: space.md, marginTop: space.md },
 });
