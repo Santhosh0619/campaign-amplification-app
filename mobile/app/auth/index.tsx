@@ -1,10 +1,5 @@
-import { EmptyState, Screen, ScreenHeader } from '@/components/ui';
+import { AuthScreen } from '@/features/auth/AuthScreen';
 
-export default function AuthScreen() {
-  return (
-    <Screen>
-      <ScreenHeader title="Sign in" />
-      <EmptyState title="Sign in" message="Built in the auth feature." />
-    </Screen>
-  );
+export default function AuthRoute() {
+  return <AuthScreen />;
 }
