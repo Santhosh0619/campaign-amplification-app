@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Campaign",
+    "slug": "campaign-amplification",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.santhosh0619.campaignamplification"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#171716",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "com.santhosh0619.campaignamplification"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-image",
+      "expo-secure-store"
+    ],
+    "scheme": "campaign",
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
