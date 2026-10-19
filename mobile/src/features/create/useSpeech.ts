@@ -1,68 +1,98 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Platform } from 'react-native';
+import { ExpoSpeechRecognitionModule } from 'expo-speech-recognition';
 
-type RecognitionLike = {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  start: () => void;
-  stop: () => void;
-  onresult: ((e: { resultIndex: number; results: ArrayLike<ArrayLike<{ transcript: string }> & { isFinal: boolean }> }) => void) | null;
-  onend: (() => void) | null;
-  onerror: ((e: { error: string }) => void) | null;
-};
-
-const getCtor = (): (new () => RecognitionLike) | undefined => {
-  if (Platform.OS !== 'web') return undefined;
-  const g = globalThis as unknown as { SpeechRecognition?: new () => RecognitionLike; webkitSpeechRecognition?: new () => RecognitionLike };
-  return g.SpeechRecognition ?? g.webkitSpeechRecognition;
-};
+type Sub = { remove: () => void };
 
 /**
- * Speech-to-text where the platform provides it (browsers). On phones without a built-in recogniser
- * `supported` is false and the interview falls back to typing or the keyboard's own dictation button.
+ * Speech-to-text through the phone's own recogniser (the browser's on web). Final phrases are
+ * handed to `onText`; the phrase being spoken right now is exposed as `interim` for live feedback.
  */
 export function useSpeech(onText: (text: string) => void) {
-  const supported = Boolean(getCtor());
+  const [supported, setSupported] = useState(true);
   const [listening, setListening] = useState(false);
+  const [interim, setInterim] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const ref = useRef<RecognitionLike | null>(null);
   const handler = useRef(onText);
   handler.current = onText;
 
-  const stop = useCallback(() => {
-    ref.current?.stop();
-    setListening(false);
+  useEffect(() => {
+    let alive = true;
+    try {
+      const ok = ExpoSpeechRecognitionModule.isRecognitionAvailable();
+      if (alive) setSupported(Boolean(ok));
+    } catch {
+      if (alive) setSupported(false);
+    }
+    const subs: Sub[] = [];
+    try {
+      subs.push(
+        ExpoSpeechRecognitionModule.addListener('result', (e) => {
+          const text = e.results?.[0]?.transcript?.trim() ?? '';
+          if (e.isFinal) {
+            setInterim('');
+            if (text) handler.current(text);
+          } else {
+            setInterim(text);
+          }
+        }),
+        ExpoSpeechRecognitionModule.addListener('end', () => {
+          setListening(false);
+          setInterim('');
+        }),
+        ExpoSpeechRecognitionModule.addListener('error', (e) => {
+          setListening(false);
+          setInterim('');
+          if (e.error === 'aborted' || e.error === 'no-speech') {
+            if (e.error === 'no-speech') setError('We did not hear anything. Tap the microphone and try again.');
+            return;
+          }
+          setError(
+            e.error === 'not-allowed'
+              ? 'Microphone access is turned off. Allow it in your phone settings, or type your answer.'
+              : e.error === 'service-not-allowed' || e.error === 'language-not-supported'
+                ? 'Speech recognition is not available on this phone. You can type your answer.'
+                : 'Could not understand that. Try again or type your answer.',
+          );
+        }),
+      );
+    } catch {
+      setSupported(false);
+    }
+    return () => {
+      alive = false;
+      subs.forEach((s) => s.remove());
+      try {
+        ExpoSpeechRecognitionModule.abort();
+      } catch {
+        // nothing to stop
+      }
+    };
   }, []);
 
-  const start = useCallback(() => {
-    const C = getCtor();
-    if (!C) return;
+  const start = useCallback(async () => {
     setError(null);
-    const r = new C();
-    r.continuous = true;
-    r.interimResults = false;
-    r.lang = 'en-US';
-    r.onresult = (e) => {
-      let out = '';
-      for (let i = e.resultIndex; i < e.results.length; i += 1) if (e.results[i].isFinal) out += e.results[i][0].transcript;
-      if (out.trim()) handler.current(out.trim());
-    };
-    r.onerror = (e) => {
-      setError(e.error === 'not-allowed' ? 'Microphone access was blocked. You can type instead.' : 'Could not hear that. You can type instead.');
-      setListening(false);
-    };
-    r.onend = () => setListening(false);
-    ref.current = r;
     try {
-      r.start();
+      const perm = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+      if (!perm.granted) {
+        setError('Microphone access is turned off. Allow it in your phone settings, or type your answer.');
+        return;
+      }
+      ExpoSpeechRecognitionModule.start({ lang: 'en-US', interimResults: true, continuous: true, addsPunctuation: true });
       setListening(true);
     } catch {
-      setError('Could not start the microphone. You can type instead.');
+      setError('Could not start the microphone. You can type your answer.');
+      setListening(false);
     }
   }, []);
 
-  useEffect(() => () => ref.current?.stop(), []);
+  const stop = useCallback(() => {
+    try {
+      ExpoSpeechRecognitionModule.stop();
+    } catch {
+      // already stopped
+    }
+    setListening(false);
+  }, []);
 
-  return { supported, listening, error, start, stop };
+  return { supported, listening, interim, error, start, stop };
 }
