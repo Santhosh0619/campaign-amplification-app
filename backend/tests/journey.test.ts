@@ -1,5 +1,6 @@
 import request from 'supertest';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { env } from '../src/config/env.js';
 import { createApp } from '../src/app.js';
 import { setStore } from '../src/db/index.js';
 import { seedIfEmpty, DEMO_EMAIL, DEMO_PASSWORD } from '../src/db/seed.js';
@@ -271,23 +272,60 @@ describe('comments', () => {
   });
 });
 
-describe('voice interview draft', () => {
+describe('AI drafting (Gemini)', () => {
+  const answers = {
+    about: 'Bus stops in the hottest districts have no shade. The tree budget is decided next month.',
+    audience: 'Commuters in the north districts',
+    why: 'Waiting in the sun is a daily health risk.',
+    evidence: 'The 2026 thermal survey https://example.org/thermal-2026 found an 11 degree gap.',
+  };
+  const geminiReply = {
+    title: 'Shade for every bus stop',
+    category: 'Civic',
+    shortDescription: 'Bus stops in the hottest districts have no shade.',
+    paragraphs: ['The tree budget is decided next month.', 'Waiting in the sun is a daily health risk.'],
+    whyBackersCare: 'Your money spreads this message.',
+    targetAudience: 'Commuters in the north districts',
+    whyItMatters: 'Waiting in the sun is a daily health risk.',
+    about: 'Shade at bus stops.',
+    whoFor: 'Commuters',
+    whyMatters: 'Health.',
+  };
+  const realFetch = globalThis.fetch;
+  afterEach(() => {
+    globalThis.fetch = realFetch;
+    env.geminiApiKey = '';
+  });
+  const fake = (status: number, body: unknown) => {
+    globalThis.fetch = (async () => new Response(JSON.stringify(body), { status })) as typeof fetch;
+  };
+  const call = async (token: string, body: object = answers) => request(app).post(api('/ai/voice-draft')).set({ Authorization: `Bearer ${token}` }).send(body);
+
   it('turns interview answers into an editable draft with sources from links', async () => {
     const token = await signUp('voice@example.com');
-    const res = await request(app)
-      .post(api('/ai/voice-draft'))
-      .set({ Authorization: `Bearer ${token}` })
-      .send({
-        about: 'Bus stops in the hottest districts have no shade. The tree budget is decided next month.',
-        audience: 'Commuters in the north districts',
-        why: 'Waiting in the sun is a daily health risk.',
-        evidence: 'The 2026 thermal survey https://example.org/thermal-2026 found an 11 degree gap.',
-      });
+    env.geminiApiKey = 'test-key';
+    fake(200, { candidates: [{ content: { parts: [{ text: JSON.stringify(geminiReply) }] } }] });
+    const res = await call(token);
     expect(res.status).toBe(200);
-    expect(res.body.draft.title.length).toBeLessThanOrEqual(60);
+    expect(res.body.draft.title).toBe('Shade for every bus stop');
     expect(res.body.draft.sources[0].url).toBe('https://example.org/thermal-2026');
-    expect(res.body.draft.targetAudience).toContain('north districts');
-    const short = await request(app).post(api('/ai/voice-draft')).set({ Authorization: `Bearer ${token}` }).send({ about: 'Hi' });
+    const short = await call(token, { about: 'Hi' });
     expect(short.status).toBe(400);
+  });
+
+  it('says the key is not linked when no key is set', async () => {
+    const token = await signUp('nokey@example.com');
+    const res = await call(token);
+    expect(res.status).toBe(503);
+    expect(res.body.code).toBe('ai_not_configured');
+  });
+
+  it('says the free limit is reached on a 429', async () => {
+    const token = await signUp('limit@example.com');
+    env.geminiApiKey = 'test-key';
+    fake(429, { error: { status: 'RESOURCE_EXHAUSTED' } });
+    const res = await call(token);
+    expect(res.status).toBe(429);
+    expect(res.body.code).toBe('ai_limit_reached');
   });
 });
