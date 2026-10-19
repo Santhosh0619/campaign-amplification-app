@@ -153,10 +153,15 @@ export function VoiceCreateScreen() {
           <View style={[styles.hint, { borderColor: colors.rule }]}>
             <Mic size={20} color={colors.inkMuted} strokeWidth={1.75} />
             <Text variant="bodySm" tone="muted" style={{ flex: 1 }}>
-              Speak your answer by tapping the microphone on your keyboard, or type it. Your words appear below.
+              Speech recognition is not available on this phone. Type your answer below, or use the microphone on your keyboard.
             </Text>
           </View>
         )}
+        {speech.listening && speech.interim ? (
+          <Text variant="bodySm" tone="muted" style={{ fontStyle: 'italic' }}>
+            {speech.interim}…
+          </Text>
+        ) : null}
         {speech.error ? (
           <Text variant="caption" tone="danger">
             {speech.error}
