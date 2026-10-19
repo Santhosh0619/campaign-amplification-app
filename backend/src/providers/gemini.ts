@@ -25,7 +25,8 @@ async function generateJson(prompt: string): Promise<Record<string, unknown>> {
       }),
       signal: AbortSignal.timeout(45_000),
     });
-  } catch {
+  } catch (e) {
+    console.error('gemini request failed', e instanceof Error ? e.message : e);
     throw aiUnavailable();
   }
   if (res.status === 429) throw aiLimitReached();
@@ -35,7 +36,10 @@ async function generateJson(prompt: string): Promise<Record<string, unknown>> {
     if (/api key/i.test(body.error?.message ?? '')) throw aiNotLinked();
     throw aiUnavailable();
   }
-  if (!res.ok) throw aiUnavailable();
+  if (!res.ok) {
+    console.error('gemini status', res.status);
+    throw aiUnavailable();
+  }
   const data = (await res.json().catch(() => null)) as { candidates?: { content?: { parts?: { text?: string }[] } }[] } | null;
   const text = data?.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
   try {
