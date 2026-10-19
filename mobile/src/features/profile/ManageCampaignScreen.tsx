@@ -15,12 +15,12 @@ import { statusTone } from './MyCampaignsScreen';
 type Action = 'next' | 'approve' | 'request_changes' | 'reject';
 
 const nextStep: Partial<Record<string, { label: string; note: string }>> = {
-  submitted: { label: 'Approve (demo reviewer)', note: 'Plays the reviewer: approves the campaign.' },
-  approved: { label: 'Open for backing (demo)', note: 'Publishes the campaign and starts the funding window.' },
-  available_for_funding: { label: 'Simulate goal reached (demo)', note: 'Pretends the remaining backers arrived. Ads still do not start by themselves.' },
-  goal_reached: { label: 'Prepare distribution (demo)', note: 'Reviewers set up ads on the chosen networks.' },
-  distribution_preparation: { label: 'Start promotion (demo)', note: 'Ads go live and early delivery numbers appear.' },
-  promoting: { label: 'Finish campaign (demo)', note: 'Publishes the final distribution report.' },
+  submitted: { label: 'Approve as reviewer', note: 'Plays the reviewer: approves the campaign.' },
+  approved: { label: 'Open for backing', note: 'Publishes the campaign and starts the funding window.' },
+  available_for_funding: { label: 'Simulate goal reached', note: 'Pretends the remaining backers arrived. Ads still do not start by themselves.' },
+  goal_reached: { label: 'Prepare distribution', note: 'Reviewers set up ads on the chosen networks.' },
+  distribution_preparation: { label: 'Start promotion', note: 'Ads go live and early delivery numbers appear.' },
+  promoting: { label: 'Finish campaign', note: 'Publishes the final distribution report.' },
 };
 
 export function ManageCampaignScreen() {
@@ -159,7 +159,7 @@ export function ManageCampaignScreen() {
           <View style={{ gap: 4 }}>
             <Text variant="heading">Review</Text>
             <Text variant="bodySm" tone="muted">
-              Demo review score {c.review.trust.score} · {c.review.trust.label}. Shown to readers as a demo score.
+              Review score {c.review.trust.score} · {c.review.trust.label}.
             </Text>
           </View>
         ) : null}
@@ -190,7 +190,7 @@ export function ManageCampaignScreen() {
         {step ? (
           <View style={[styles.demo, { borderColor: colors.rule }]}>
             <Text variant="kicker" tone="muted">
-              Demo tools
+              Review tools
             </Text>
             <Text variant="bodySm" tone="muted">
               {step.note}

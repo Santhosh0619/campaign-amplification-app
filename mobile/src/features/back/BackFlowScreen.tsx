@@ -368,9 +368,9 @@ export function BackFlowScreen() {
         <View style={{ gap: space.xl }}>
           <View style={[styles.demo, { borderColor: colors.warn, backgroundColor: colors.warnSoft }]}>
             <Text variant="kicker" tone="warn">
-              Demo payment
+              Test payment
             </Text>
-            <Text variant="bodySm">No real card is used and no money moves. Choose how the simulated payment provider should respond to see each state.</Text>
+            <Text variant="bodySm">No real card is used and no money moves. Choose how the payment provider should respond to see each state.</Text>
           </View>
 
           <View style={{ gap: space.sm }}>
@@ -389,7 +389,7 @@ export function BackFlowScreen() {
               {error}
             </Text>
           ) : null}
-          <Button label={`Pay ${money(contribution.total, { cents: true })} (demo)`} loading={settle.isPending} onPress={() => settle.mutate(outcome === 'success' ? 'success' : outcome === 'fail' ? 'fail' : 'pending')} />
+          <Button label={`Pay ${money(contribution.total, { cents: true })}`} loading={settle.isPending} onPress={() => settle.mutate(outcome === 'success' ? 'success' : outcome === 'fail' ? 'fail' : 'pending')} />
           <Button label="Cancel payment" variant="ghost" disabled={settle.isPending} onPress={() => settle.mutate('cancel')} />
         </View>
       ) : null}
@@ -484,7 +484,7 @@ function Result({ contribution: k, campaign, title, onShare, onRetry, onChangeAm
 
       {k.status === 'pending' ? (
         <>
-          <Button label="Demo: simulate provider confirmation" onPress={onConfirmPending} loading={confirming} />
+          <Button label="Simulate provider confirmation" onPress={onConfirmPending} loading={confirming} />
           <Button label="Back to the campaign" variant="ghost" onPress={onViewCampaign} />
         </>
       ) : null}

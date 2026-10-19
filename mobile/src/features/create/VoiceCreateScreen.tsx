@@ -123,7 +123,7 @@ export function VoiceCreateScreen() {
       <View style={{ gap: space.xl }}>
         <View style={{ gap: space.sm }}>
           <Text variant="kicker" tone="muted">
-            Question {index + 1} of {questions.length} · Demo AI
+            Question {index + 1} of {questions.length}
           </Text>
           <ProgressBar value={(index + 1) / questions.length} tone="action" />
         </View>

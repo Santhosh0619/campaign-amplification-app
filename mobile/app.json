@@ -8,7 +8,7 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.santhosh0619.campaignamplification"
+      "bundleIdentifier": "app.campaign.amplify"
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +18,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.santhosh0619.campaignamplification"
+      "package": "app.campaign.amplify"
     },
     "plugins": [
       "expo-router",

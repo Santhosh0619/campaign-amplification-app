@@ -18,10 +18,9 @@ export function TrustBlock({ trust }: { trust: TrustReview }) {
           <Text variant="numberLg">{trust.score}</Text>
           <Text variant="label">{trust.label}</Text>
         </View>
-        <StatusChip label="Demo review" tone="warn" />
       </View>
       <Text variant="bodySm" tone="muted">
-        This score is part of the prototype’s demo data. It shows how reviewer scores would appear. It is not a guarantee of accuracy.
+        A reviewer’s score of how well the campaign is sourced and presented. It is not a guarantee of accuracy.
       </Text>
       {rows.map((r) => {
         const item = trust[r.key];

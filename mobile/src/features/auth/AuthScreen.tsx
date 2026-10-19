@@ -146,17 +146,6 @@ export function AuthScreen() {
         <Button label={mode === 'signup' ? 'Create account' : 'Sign in'} onPress={() => submit()} loading={busy} />
         <Button label="Keep browsing" variant="ghost" onPress={close} />
 
-        {cfg.demoMode ? (
-          <View style={[styles.demo, { borderColor: colors.rule }]}>
-            <Text variant="kicker" tone="muted">
-              Demo mode
-            </Text>
-            <Text variant="bodySm" tone="muted">
-              Reviewing the prototype? Use the sample account. It already has campaigns in every stage, notifications and a backing history.
-            </Text>
-            <Button label="Use the demo account" variant="secondary" size="sm" disabled={busy} onPress={() => submit({ email: 'demo@campaign.app', password: 'demo1234' })} fullWidth={false} />
-          </View>
-        ) : null}
       </KeyboardAvoidingView>
     </Screen>
   );
@@ -168,5 +157,4 @@ const styles = StyleSheet.create({
   segmentItem: { flex: 1, minHeight: 46, alignItems: 'center', justifyContent: 'center' },
   eye: { position: 'absolute', right: 14, top: 34, height: 44, justifyContent: 'center' },
   error: { borderLeftWidth: 3, padding: space.md },
-  demo: { borderTopWidth: 1, paddingTop: space.lg, gap: space.sm },
 });

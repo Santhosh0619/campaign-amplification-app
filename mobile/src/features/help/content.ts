@@ -16,7 +16,7 @@ export const helpTopics: Record<string, HelpTopic> = {
   },
   'how-we-review': {
     title: 'How we review campaigns',
-    intro: 'Every campaign is checked before it is published. In this prototype the scores you see are demo data.',
+    intro: 'Every campaign is checked before it is published.',
     sections: [
       { title: 'Fact-checking', body: ['Reviewers open the listed sources and check that the main claims are backed by them.'] },
       { title: 'Communication integrity', body: ['Does the message acknowledge complexity and present a balanced framing? Reviewers look at fairness across several dimensions.'] },
@@ -59,10 +59,10 @@ export const helpTopics: Record<string, HelpTopic> = {
   },
   legal: {
     title: 'About, contact and policies',
-    intro: 'This is a hackathon prototype built for the Campaign Amplification challenge.',
+    intro: 'Campaign is a community-funded way to get a message in front of people outside your own network.',
     sections: [
-      { title: 'About', body: ['Campaign is a mobile-first take on a community-funded message amplification platform. Figures, scores and campaigns shown are demonstration data.'] },
-      { title: 'Contact', body: ['This prototype has no live support desk. Questions go to the hackathon organisers.'] },
+      { title: 'About', body: ['Campaign is a mobile-first take on a community-funded message amplification platform. Payments in this version are simulated.'] },
+      { title: 'Contact', body: ['There is no live support desk yet. Send questions to the team that shared this app with you.'] },
       { title: 'Terms of service', body: ['By submitting a campaign you confirm every claim is one you can stand behind and that you have the right to use the images you upload. Editing an approved campaign sends it back for review.'] },
       { title: 'Privacy', body: ['Targeting uses grouped location, interests and age ranges, never personal information about individuals. Your payment details are never stored in this prototype.'] },
       { title: 'Community guidelines', body: ['Be accurate and fair, cite your sources, and respect the people your message is about. Content that cannot be backed by its sources is not approved.'] },
