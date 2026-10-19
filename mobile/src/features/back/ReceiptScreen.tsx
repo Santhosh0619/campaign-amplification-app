@@ -47,7 +47,7 @@ export function ReceiptScreen() {
         <Line label="Total paid" value={money(k.total, { cents: true })} strong />
         <Line label="Estimated reach" value={`≈ ${number(k.estimatedReach)} people`} />
         <Text variant="caption" tone="muted">
-          Demo receipt. This payment was simulated and no money moved. The contribution pays for message amplification, not direct support for the cause.
+          Test payment: no money moved. The contribution pays for message amplification, not direct support for the cause.
         </Text>
         <Button label="View campaign" variant="secondary" onPress={() => router.push({ pathname: '/campaign/[slug]', params: { slug: c.slug } })} />
       </View>

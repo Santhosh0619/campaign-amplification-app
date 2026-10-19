@@ -103,7 +103,7 @@ export function ProfileScreen() {
 
         <Button label="Sign out" variant="secondary" onPress={() => void signOut()} />
         <Text variant="caption" tone="muted" align="center">
-          Prototype with demo data. Payments are simulated.
+          Payments in this version are simulated; no real money moves.
         </Text>
       </View>
     </Screen>

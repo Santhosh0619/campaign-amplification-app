@@ -79,9 +79,6 @@ export function StepBasics({ form, update, problems }: Props) {
           <Text variant="kicker" tone="action">
             Draft it for me
           </Text>
-          <Text variant="kicker" tone="muted">
-            Demo AI
-          </Text>
         </View>
         <Text variant="bodySm" tone="muted">
           Describe your campaign in a few sentences and we will fill the steps. You stay in control and can edit or delete anything. Your funding goal stays yours to set on the last step.

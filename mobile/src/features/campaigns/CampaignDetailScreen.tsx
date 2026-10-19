@@ -352,11 +352,6 @@ export function CampaignDetailScreen() {
 
           <CommentThread slug={String(slug)} />
 
-          {c.isDemo ? (
-            <Text variant="caption" tone="muted">
-              Figures on this page are demonstration data for the prototype. Reach is an estimate based on the app’s configured rate, not a promise.
-            </Text>
-          ) : null}
         </View>
       ) : null}
     </Screen>

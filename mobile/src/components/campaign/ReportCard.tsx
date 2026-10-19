@@ -26,7 +26,7 @@ export function ReportCard({ report }: { report: Report }) {
         <View style={{ gap: space.md }}>
           <View style={[styles.tag, { backgroundColor: m.reachKind === 'measured' ? colors.positiveSoft : colors.warnSoft }]}>
             <Text variant="kicker" tone={m.reachKind === 'measured' ? 'positive' : 'warn'}>
-              {m.reachKind === 'measured' ? 'Measured by the ad platforms · demo figures' : 'Estimated · will change'}
+              {m.reachKind === 'measured' ? 'Measured by the ad platforms' : 'Estimated · will change'}
             </Text>
           </View>
           <View style={styles.grid}>

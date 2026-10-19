@@ -23,7 +23,7 @@ export function SubmittedScreen({ campaignId, slug, title }: Props) {
       await api(`/campaigns/${campaignId}/demo-advance`, { method: 'POST', body: { action: 'next' } });
     },
     onSuccess: () => {
-      toast.success('Approved in demo review. The campaign is now open for backing.');
+      toast.success('Approved. The campaign is now open for backing.');
       void qc.invalidateQueries({ queryKey: ['campaigns'] });
       void qc.invalidateQueries({ queryKey: ['notifications'] });
       router.replace({ pathname: '/campaign/[slug]', params: { slug } });
@@ -76,12 +76,12 @@ export function SubmittedScreen({ campaignId, slug, title }: Props) {
         {cfg.demoMode ? (
           <View style={[styles.demo, { borderColor: colors.rule }]}>
             <Text variant="kicker" tone="muted">
-              Demo tools
+              Review tools
             </Text>
             <Text variant="bodySm" tone="muted">
-              Reviewing the prototype? Skip the wait: this plays the reviewer and opens the campaign for backing.
+              Skip the review wait: this approves the campaign and opens it for backing.
             </Text>
-            <Button label="Approve and open for backing (demo)" variant="secondary" size="sm" onPress={() => skip.mutate()} loading={skip.isPending} fullWidth={false} />
+            <Button label="Approve and open for backing" variant="secondary" size="sm" onPress={() => skip.mutate()} loading={skip.isPending} fullWidth={false} />
           </View>
         ) : null}
       </View>

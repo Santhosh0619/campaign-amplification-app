@@ -48,7 +48,7 @@ export function StepVisuals({ form, update, problems }: Props) {
           <View style={{ gap: space.sm }}>
             <CoverArt seed={form.title || 'new'} category={form.category || 'Other'} ratio={16 / 10} />
             <Text variant="caption" tone="muted">
-              Generated cover (demo). It needs no image rights.
+              Generated cover. It needs no image rights.
             </Text>
             <View style={styles.actions}>
               <Button label="Generate again" variant="secondary" size="sm" onPress={() => generate.mutate()} loading={generate.isPending} fullWidth={false} />
@@ -67,7 +67,7 @@ export function StepVisuals({ form, update, problems }: Props) {
 
         {!hasCover ? (
           <View style={{ gap: space.xs }}>
-            <Button label="Generate a cover (demo)" variant="secondary" onPress={() => generate.mutate()} loading={generate.isPending} />
+            <Button label="Generate a cover" variant="secondary" onPress={() => generate.mutate()} loading={generate.isPending} />
             {aiError ? (
               <Text variant="caption" tone="danger">
                 {aiError}
