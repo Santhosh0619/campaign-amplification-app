@@ -52,18 +52,21 @@
             "useLegacyPackaging": false
           }
         }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#ECEAE4",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 1,
+          "dark": {
+            "backgroundColor": "#121211",
+            "image": "./assets/splash-icon.png"
+          }
+        }
       ]
     ],
     "scheme": "campaign",
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ECEAE4",
-      "dark": {
-        "image": "./assets/splash-icon.png",
-        "backgroundColor": "#121211"
-      }
-    },
     "extra": {
       "router": {
         "asyncRoutes": {
