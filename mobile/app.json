@@ -31,13 +31,38 @@
           "photosPermission": "Campaign uses your photos so you can add pictures to your campaign."
         }
       ],
-      ["expo-speech-recognition",{"microphonePermission":"Campaign uses the microphone so you can speak your answers instead of typing.","speechRecognitionPermission":"Campaign turns your speech into text for your answers."}]
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Campaign uses the microphone so you can speak your answers instead of typing.",
+          "speechRecognitionPermission": "Campaign turns your speech into text for your answers."
+        }
+      ],
+      "expo-build-properties",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "buildArchs": [
+              "arm64-v8a",
+              "armeabi-v7a"
+            ],
+            "enableMinifyInRelease": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "useLegacyPackaging": false
+          }
+        }
+      ]
     ],
     "scheme": "campaign",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ECEAE4"
+      "backgroundColor": "#ECEAE4",
+      "dark": {
+        "image": "./assets/splash-icon.png",
+        "backgroundColor": "#121211"
+      }
     },
     "extra": {
       "router": {
