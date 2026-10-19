@@ -9,6 +9,7 @@ import { HowItWorks } from '@/components/campaign/HowItWorks';
 import { Button, Divider, ErrorState, Screen, Text } from '@/components/ui';
 import { errorMessage } from '@/api/client';
 import { layout, radius, space, useTheme } from '@/theme';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useAuth } from '@/store/auth';
 
 export function HomeScreen() {
@@ -26,15 +27,18 @@ export function HomeScreen() {
         <Text variant="heading" style={{ letterSpacing: -0.4 }}>
           Campaign
         </Text>
-        {!user ? (
-          <Pressable onPress={() => router.push('/auth')} accessibilityRole="button" hitSlop={8}>
-            <Text variant="label">Sign in</Text>
-          </Pressable>
-        ) : (
-          <Text variant="caption" tone="muted">
-            {user.name}
-          </Text>
-        )}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+          {!user ? (
+            <Pressable onPress={() => router.push('/auth')} accessibilityRole="button" hitSlop={8}>
+              <Text variant="label">Sign in</Text>
+            </Pressable>
+          ) : (
+            <Text variant="caption" tone="muted" numberOfLines={1} style={{ maxWidth: 150 }}>
+              {user.name}
+            </Text>
+          )}
+          <ThemeToggle />
+        </View>
       </View>
 
       <View style={[styles.pad, styles.hero]}>

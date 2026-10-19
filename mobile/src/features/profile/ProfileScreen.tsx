@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/api/client';
 import { useMyCampaigns } from '@/api/hooks';
-import { Button, ListRow, Screen, Text } from '@/components/ui';
+import { Button, ListRow, Screen, Text, ThemeSwitch } from '@/components/ui';
 import { money, shortDate } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { space, useTheme } from '@/theme';
@@ -20,7 +20,9 @@ export function ProfileScreen() {
   const impact = useQuery({ queryKey: ['impact', 'all'], queryFn: () => api<Impact>('/me/impact?range=all'), enabled: Boolean(user) });
 
   const helpRows = (
-    <View>
+    <View style={{ gap: space.lg }}>
+      <ThemeSwitch />
+      <View>
       <Text variant="kicker" tone="muted" style={styles.section}>
         Help and about
       </Text>
@@ -30,6 +32,7 @@ export function ProfileScreen() {
       <ListRow title="FAQ and help" onPress={() => router.push({ pathname: '/help/[topic]', params: { topic: 'faq' } })} />
       <ListRow title="Partners" onPress={() => router.push({ pathname: '/help/[topic]', params: { topic: 'partners' } })} />
       <ListRow title="About, contact, terms and privacy" onPress={() => router.push({ pathname: '/help/[topic]', params: { topic: 'legal' } })} />
+      </View>
     </View>
   );
 
